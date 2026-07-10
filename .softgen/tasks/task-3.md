@@ -1,7 +1,6 @@
-<![CDATA[
 ---
 title: Vehicle Registry
-status: in_progress
+status: done
 priority: high
 type: feature
 tags: [vehicles, registry, crud, supabase]
@@ -14,15 +13,15 @@ position: 3
 Allow administrators to register, view, edit, and manage vehicles. Each vehicle belongs to a customer and a workshop (user). Store vehicle details, images, documents, and current status.
 
 ## Checklist
-- [ ] Create `vehicles`, `vehicle_images`, and `vehicle_documents` tables with RLS
-- [ ] Create `customers` table linked to vehicles
-- [ ] Add vehicle storage buckets for photos and documents
-- [ ] Build `/vehicles` page with searchable list
-- [ ] Build `/vehicles/new` page with multi-step form
-- [ ] Build `/vehicles/[id]` detail page
-- [ ] Implement status indicators (up to date / due soon / overdue)
-- [ ] Add search/filter by plate, VIN, make, model, customer, status
-- [ ] Pass `check_for_errors`
+- [x] Create `vehicles`, `vehicle_images`, and `vehicle_documents` tables with RLS
+- [x] Create `customers` table linked to vehicles
+- [x] Add vehicle storage buckets for photos and documents
+- [x] Build `/vehicles` page with searchable list
+- [x] Build `/vehicles/new` page with multi-step form
+- [x] Build `/vehicles/[id]` detail page
+- [x] Implement status indicators (up to date / due soon / overdue)
+- [x] Add search/filter by plate, VIN, make, model, customer, status
+- [x] Pass `check_for_errors`
 
 ## Acceptance
 - Admins can add vehicles with full details and photos
