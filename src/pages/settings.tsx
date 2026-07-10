@@ -12,8 +12,10 @@ import { withAuth } from "@/lib/withAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserProfile, upsertUserProfile, UserProfile, updateUserMetadata, listMfaFactors, enrollMfaFactor, verifyMfaFactor, unenrollMfaFactor } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
-import { User, Building2, Lock, ShieldCheck, Upload, Loader2, KeyRound, Trash2 } from "lucide-react";
+import { User, Building2, Lock, ShieldCheck, Upload, Loader2, KeyRound, Trash2, Bell, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { logSecurityEvent, getSecurityEvents, getNotificationPreferences, upsertNotificationPreferences, sendSecurityEmail, SecurityEventType } from "@/services/notificationService";
+import { Badge } from "@/components/ui/badge";
 
 function SettingsPage({ user }: { user: { id: string; email?: string } }) {
   const router = useRouter();
@@ -60,12 +62,17 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
     loading: false,
   });
 
+  const [events, setEvents] = useState<Array<{ id: string; event_type: SecurityEventType; metadata: any; created_at: string }>>([]);
+  const [preferences, setPreferences] = useState({ security_emails: true, reminder_emails: true, marketing_emails: false });
+
   useEffect(() => {
     const load = async () => {
-      const [p, { data: identities }, factors] = await Promise.all([
+      const [p, { data: identities }, factors, prefs, evts] = await Promise.all([
         getUserProfile(user.id),
         supabase.auth.getUserIdentities(),
         listMfaFactors().catch(() => ({ all: [], totp: [] })),
+        getNotificationPreferences(user.id).catch(() => null),
+        getSecurityEvents(user.id, 10).catch(() => []),
       ]);
       setProfile(p);
       if (identities) {
@@ -88,6 +95,14 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
       if (factors?.totp?.[0]) {
         setMfa((prev) => ({ ...prev, factor: factors.totp[0] }));
       }
+      if (prefs) {
+        setPreferences({
+          security_emails: prefs.security_emails,
+          reminder_emails: prefs.reminder_emails,
+          marketing_emails: prefs.marketing_emails,
+        });
+      }
+      setEvents(evts);
     };
     load();
   }, [user.id, user.email]);
@@ -160,6 +175,7 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
     try {
       const { error } = await supabase.auth.updateUser({ password: passwords.new });
       if (error) throw error;
+      await notifySecurityEvent("password_changed", {});
       toast({ title: "Password updated", description: "Your new password is active." });
       setPasswords({ current: "", new: "", confirm: "" });
     } catch (err: any) {
@@ -179,6 +195,7 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
       } as any);
       if (error) throw error;
       setProviders((prev) => prev.filter((p) => p !== provider));
+      await notifySecurityEvent("provider_unlinked", { provider });
       toast({ title: "Provider unlinked", description: `${provider} has been removed.` });
     } catch (err: any) {
       toast({ variant: "destructive", title: "Unlink failed", description: err.message });
@@ -208,6 +225,7 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
     setMfa((prev) => ({ ...prev, verifying: true }));
     try {
       await verifyMfaFactor(mfa.factor.id, mfa.code);
+      await notifySecurityEvent("mfa_enrolled", { factor_id: mfa.factor.id });
       toast({ title: "MFA enabled", description: "Your account is now protected with TOTP." });
       setMfa((prev) => ({ ...prev, factor: { ...(prev.factor as any), status: "verified" }, qr: "", secret: "", code: "" }));
     } catch (err: any) {
@@ -221,10 +239,36 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
     if (!mfa.factor?.id) return;
     try {
       await unenrollMfaFactor(mfa.factor.id);
+      await notifySecurityEvent("mfa_unenrolled", { factor_id: mfa.factor.id });
       setMfa((prev) => ({ ...prev, factor: null, qr: "", secret: "", code: "" }));
       toast({ title: "MFA removed", description: "Your authenticator app is no longer linked." });
     } catch (err: any) {
       toast({ variant: "destructive", title: "Failed to remove MFA", description: err.message });
+    }
+  };
+
+  const handleTogglePreference = async (key: keyof typeof preferences) => {
+    const next = { ...preferences, [key]: !preferences[key] };
+    setPreferences(next);
+    try {
+      await upsertNotificationPreferences(user.id, { [key]: next[key] });
+      toast({ title: "Preferences updated" });
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Update failed", description: err.message });
+      setPreferences(preferences);
+    }
+  };
+
+  const notifySecurityEvent = async (eventType: SecurityEventType, metadata: any = {}) => {
+    try {
+      await logSecurityEvent(user.id, eventType, metadata);
+      const evts = await getSecurityEvents(user.id, 10);
+      setEvents(evts);
+      if (preferences.security_emails && user.email) {
+        await sendSecurityEmail(user.email, eventType, { userName: form.full_name, timestamp: new Date().toISOString(), ...metadata });
+      }
+    } catch {
+      // Non-blocking
     }
   };
 
@@ -246,7 +290,7 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
           </div>
 
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="mb-6 grid w-full grid-cols-3 sm:w-fit sm:grid-cols-3">
+            <TabsList className="mb-6 grid w-full grid-cols-4 sm:w-fit sm:grid-cols-4">
               <TabsTrigger value="profile" className="gap-2">
                 <Building2 className="h-4 w-4" /> Business
               </TabsTrigger>
@@ -255,6 +299,9 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
               </TabsTrigger>
               <TabsTrigger value="security" className="gap-2">
                 <Lock className="h-4 w-4" /> Security
+              </TabsTrigger>
+              <TabsTrigger value="notifications" className="gap-2">
+                <Bell className="h-4 w-4" /> Alerts
               </TabsTrigger>
             </TabsList>
 
@@ -502,6 +549,67 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
                         </div>
                       )}
                     </>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="notifications">
+              <Card className="glass-card mb-6">
+                <CardHeader>
+                  <CardTitle className="font-heading text-lg">Email preferences</CardTitle>
+                  <CardDescription>Choose which emails we send to {user.email}.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    { key: "security_emails", label: "Security alerts", description: "MFA changes, password resets, new logins." },
+                    { key: "reminder_emails", label: "Service reminders", description: "Upcoming maintenance and overdue services." },
+                    { key: "marketing_emails", label: "Product updates", description: "New features and tips (rare)." },
+                  ].map((pref) => (
+                    <div key={pref.key} className="flex items-center justify-between rounded-xl border p-4">
+                      <div>
+                        <p className="font-medium">{pref.label}</p>
+                        <p className="text-sm text-muted-foreground">{pref.description}</p>
+                      </div>
+                      <Button
+                        variant={preferences[pref.key as keyof typeof preferences] ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleTogglePreference(pref.key as keyof typeof preferences)}
+                      >
+                        {preferences[pref.key as keyof typeof preferences] ? "On" : "Off"}
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="font-heading text-lg">Recent security events</CardTitle>
+                  <CardDescription>Account changes detected in the last 30 days.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {events.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-10 text-center">
+                      <Mail className="mb-2 h-10 w-10 text-muted-foreground/60" />
+                      <p className="font-medium">No recent events</p>
+                      <p className="text-sm text-muted-foreground">Security actions will appear here.</p>
+                    </div>
+                  ) : (
+                    events.map((evt) => (
+                      <div key={evt.id} className="flex items-center justify-between rounded-xl border p-4">
+                        <div className="flex items-center gap-3">
+                          <ShieldCheck className="h-5 w-5 text-success" />
+                          <div>
+                            <p className="font-medium capitalize">{evt.event_type.replace(/_/g, " ")}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(evt.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge variant="outline">Logged</Badge>
+                      </div>
+                    ))
                   )}
                 </CardContent>
               </Card>
