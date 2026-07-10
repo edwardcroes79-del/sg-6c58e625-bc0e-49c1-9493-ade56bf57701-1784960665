@@ -74,7 +74,7 @@ export default function LoginPage() {
         if (error) throw error;
         if (data.user) {
           toast({ title: "Welcome back" });
-          router.push("/dashboard");
+          window.location.href = "/dashboard";
         }
       }
     } catch (err) {
