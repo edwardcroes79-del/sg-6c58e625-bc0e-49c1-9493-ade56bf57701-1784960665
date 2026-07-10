@@ -102,7 +102,7 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
           marketing_emails: prefs.marketing_emails,
         });
       }
-      setEvents(evts);
+      setEvents(evts as any);
     };
     load();
   }, [user.id, user.email]);
@@ -263,7 +263,7 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
     try {
       await logSecurityEvent(user.id, eventType, metadata);
       const evts = await getSecurityEvents(user.id, 10);
-      setEvents(evts);
+      setEvents(evts as any);
       if (preferences.security_emails && user.email) {
         await sendSecurityEmail(user.email, eventType, { userName: form.full_name, timestamp: new Date().toISOString(), ...metadata });
       }
