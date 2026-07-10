@@ -1,26 +1,27 @@
+<![CDATA[
 ---
-title: Reports, Branding & Polish
+title: Digital Service Card & QR Code
 status: todo
-priority: medium
+priority: high
 type: feature
-tags: [reports, branding, white-label, pdf]
+tags: [service-card, qr-code, public, sharing]
 created_by: agent
-created_at: 2026-07-10T19:23:56Z
+created_at: 2026-07-10T20:10:00Z
 position: 6
 ---
 
 ## Notes
-White-label features and downloadable reports complete the commercial offering.
+Generate a beautiful public digital service card per vehicle, accessible via a unique QR code. Owners and workshops can share the link; scanning shows current status and history.
 
 ## Checklist
-- [ ] Build workshop branding settings
-- [ ] Generate branded PDF service reports
-- [ ] Customize email templates
-- [ ] Add audit logs
-- [ ] Add two-factor auth option
-- [ ] Final responsive and accessibility pass
+- [ ] Create public `/service-card/[id]` page
+- [ ] Generate unique QR code URL per vehicle
+- [ ] Build vehicle header with banner image and details
+- [ ] Show owner information, service history, and upcoming maintenance
+- [ ] Add QR code download/print action for admins
+- [ ] Pass `check_for_errors`
 
 ## Acceptance
-- Workshop can customize logo, colors, and contact info
-- PDF report includes service history and QR code
-- No platform branding in white-label mode
+- Each vehicle has a unique QR code
+- Scanning displays the live digital service card
+- Service card is mobile-responsive and branded
