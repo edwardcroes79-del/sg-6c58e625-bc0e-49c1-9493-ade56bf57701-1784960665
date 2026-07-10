@@ -25,7 +25,13 @@ export async function middleware(req: NextRequest) {
 
   const { pathname } = req.nextUrl;
   const isProtected =
-    pathname.startsWith("/dashboard") || pathname.startsWith("/onboarding");
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/vehicles") ||
+    pathname.startsWith("/customers") ||
+    pathname.startsWith("/services") ||
+    pathname.startsWith("/reminders") ||
+    pathname.startsWith("/settings");
   const isAuthPage =
     pathname === "/login" || pathname.startsWith("/auth/");
 

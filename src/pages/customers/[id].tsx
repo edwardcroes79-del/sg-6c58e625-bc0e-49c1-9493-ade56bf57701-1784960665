@@ -8,9 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { getCustomer, deleteCustomer } from "@/services/customerService";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Mail, Phone, MapPin, User, Car, Loader2, Trash2 } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
-function CustomerDetailPage({ user }: { user: User }) {
+function CustomerDetailPage({ user }: { user: SupabaseUser }) {
   const router = useRouter();
   const { id } = router.query;
   const { toast } = useToast();

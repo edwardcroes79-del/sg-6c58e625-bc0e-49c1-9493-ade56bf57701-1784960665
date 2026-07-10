@@ -9,9 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { createCustomer } from "@/services/customerService";
 import { useToast } from "@/hooks/use-toast";
 import { ChevronLeft, User, Loader2 } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
-function NewCustomerPage({ user }: { user: User }) {
+function NewCustomerPage({ user }: { user: SupabaseUser }) {
   const router = useRouter();
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);

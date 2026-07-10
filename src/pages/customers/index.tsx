@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCustomers } from "@/services/customerService";
 import { Search, Plus, User, Mail, Phone, Loader2, Car } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
-function CustomersPage({ user }: { user: User }) {
+function CustomersPage({ user }: { user: SupabaseUser }) {
   const router = useRouter();
   const [customers, setCustomers] = useState<Array<any>>([]);
   const [search, setSearch] = useState("");
