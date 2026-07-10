@@ -179,3 +179,89 @@ export const authService = {
     return supabase.auth.onAuthStateChange(callback);
   }
 };
+
+export type UserProfile = {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+  phone: string | null;
+  role: "admin" | "owner" | "technician";
+  business_name: string | null;
+  business_address: string | null;
+  business_phone: string | null;
+  business_email: string | null;
+  primary_color: string | null;
+  accent_color: string | null;
+  logo_url: string | null;
+  onboarding_completed: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UserRole = UserProfile["role"];
+
+export async function getCurrentUser() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) throw error;
+  return data.user;
+}
+
+export async function getCurrentSession() {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  return data.session;
+}
+
+export async function getUserProfile(userId: string) {
+  const { data, error } = await supabase
+    .from("user_profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  return data as UserProfile | null;
+}
+
+export async function upsertUserProfile(
+  userId: string,
+  updates: Partial<Omit<UserProfile, "id" | "created_at" | "updated_at">>
+) {
+  const { data, error } = await supabase
+    .from("user_profiles")
+    .upsert(
+      { id: userId, ...updates, updated_at: new Date().toISOString() },
+      { onConflict: "id" }
+    )
+    .select()
+    .single();
+  if (error) throw error;
+  return data as UserProfile;
+}
+
+export async function completeOnboarding(userId: string, profile: Partial<UserProfile>) {
+  return upsertUserProfile(userId, { ...profile, onboarding_completed: true });
+}
+
+export async function signOut() {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+}
+
+export async function updateBranding(userId: string, branding: {
+  business_name?: string;
+  business_address?: string;
+  business_phone?: string;
+  business_email?: string;
+  primary_color?: string;
+  accent_color?: string;
+  logo_url?: string;
+}) {
+  return upsertUserProfile(userId, branding);
+}
+
+export async function updateUserMetadata(fullName: string) {
+  const { error } = await supabase.auth.updateUser({
+    data: { full_name: fullName },
+  });
+  if (error) throw error;
+}
