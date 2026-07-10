@@ -21,7 +21,6 @@ import {
   Menu,
   X,
   ChevronRight,
-  Settings,
 } from "lucide-react";
 
 function DashboardPage({ user }: { user: User }) {
@@ -96,6 +95,13 @@ function DashboardPage({ user }: { user: User }) {
                   {item.label}
                 </button>
               ))}
+              <button
+                onClick={() => router.push("/settings")}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </button>
             </nav>
 
             <div className="mt-auto border-t border-border pt-4">
