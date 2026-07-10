@@ -15,6 +15,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      customers: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          email: string | null
+          emergency_contact: string | null
+          full_name: string
+          id: string
+          phone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          emergency_contact?: string | null
+          full_name: string
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          emergency_contact?: string | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           marketing_emails: boolean | null
@@ -66,6 +102,50 @@ export type Database = {
         }
         Relationships: []
       }
+      reminders: {
+        Row: {
+          created_at: string | null
+          due_date: string | null
+          due_mileage: number | null
+          id: string
+          reminder_type: string
+          sent_at: string | null
+          status: string
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          due_date?: string | null
+          due_mileage?: number | null
+          id?: string
+          reminder_type?: string
+          sent_at?: string | null
+          status?: string
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string | null
+          due_date?: string | null
+          due_mileage?: number | null
+          id?: string
+          reminder_type?: string
+          sent_at?: string | null
+          status?: string
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_events: {
         Row: {
           created_at: string | null
@@ -89,6 +169,138 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      service_items: {
+        Row: {
+          id: string
+          name: string
+          oil_used: string | null
+          quantity: number | null
+          service_id: string
+          unit_price: number | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          oil_used?: string | null
+          quantity?: number | null
+          service_id: string
+          unit_price?: number | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          oil_used?: string | null
+          quantity?: number | null
+          service_id?: string
+          unit_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_photos: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          id: string
+          is_before: boolean | null
+          service_id: string
+          url: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          is_before?: boolean | null
+          service_id: string
+          url: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          is_before?: boolean | null
+          service_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_photos_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          cost: number | null
+          created_at: string | null
+          digital_signature_url: string | null
+          id: string
+          mechanic_name: string | null
+          mileage: number
+          service_date: string
+          service_type: string
+          status: string
+          technician_notes: string | null
+          updated_at: string | null
+          user_id: string
+          vehicle_id: string
+          work_completed: string | null
+          workshop_name: string | null
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string | null
+          digital_signature_url?: string | null
+          id?: string
+          mechanic_name?: string | null
+          mileage: number
+          service_date: string
+          service_type: string
+          status?: string
+          technician_notes?: string | null
+          updated_at?: string | null
+          user_id: string
+          vehicle_id: string
+          work_completed?: string | null
+          workshop_name?: string | null
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string | null
+          digital_signature_url?: string | null
+          id?: string
+          mechanic_name?: string | null
+          mileage?: number
+          service_date?: string
+          service_type?: string
+          status?: string
+          technician_notes?: string | null
+          updated_at?: string | null
+          user_id?: string
+          vehicle_id?: string
+          work_completed?: string | null
+          workshop_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_profiles: {
         Row: {
@@ -143,6 +355,165 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      vehicle_documents: {
+        Row: {
+          created_at: string | null
+          document_type: string
+          file_name: string
+          id: string
+          url: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          document_type: string
+          file_name: string
+          id?: string
+          url: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string | null
+          document_type?: string
+          file_name?: string
+          id?: string
+          url?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_documents_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_images: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          id: string
+          is_banner: boolean | null
+          url: string
+          vehicle_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          is_banner?: boolean | null
+          url: string
+          vehicle_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          is_banner?: boolean | null
+          url?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_images_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicles: {
+        Row: {
+          banner_image_url: string | null
+          color: string | null
+          created_at: string | null
+          current_mileage: number
+          customer_id: string | null
+          engine_type: string | null
+          fuel_type: string | null
+          id: string
+          insurance_expiry: string | null
+          license_plate: string
+          make: string
+          model: string
+          next_service_date: string | null
+          next_service_km: number | null
+          qr_code_url: string | null
+          registration_expiry: string | null
+          service_interval_km: number | null
+          service_interval_months: number | null
+          status: string
+          transmission: string | null
+          updated_at: string | null
+          user_id: string
+          vin: string | null
+          year: number | null
+        }
+        Insert: {
+          banner_image_url?: string | null
+          color?: string | null
+          created_at?: string | null
+          current_mileage?: number
+          customer_id?: string | null
+          engine_type?: string | null
+          fuel_type?: string | null
+          id?: string
+          insurance_expiry?: string | null
+          license_plate: string
+          make: string
+          model: string
+          next_service_date?: string | null
+          next_service_km?: number | null
+          qr_code_url?: string | null
+          registration_expiry?: string | null
+          service_interval_km?: number | null
+          service_interval_months?: number | null
+          status?: string
+          transmission?: string | null
+          updated_at?: string | null
+          user_id: string
+          vin?: string | null
+          year?: number | null
+        }
+        Update: {
+          banner_image_url?: string | null
+          color?: string | null
+          created_at?: string | null
+          current_mileage?: number
+          customer_id?: string | null
+          engine_type?: string | null
+          fuel_type?: string | null
+          id?: string
+          insurance_expiry?: string | null
+          license_plate?: string
+          make?: string
+          model?: string
+          next_service_date?: string | null
+          next_service_km?: number | null
+          qr_code_url?: string | null
+          registration_expiry?: string | null
+          service_interval_km?: number | null
+          service_interval_months?: number | null
+          status?: string
+          transmission?: string | null
+          updated_at?: string | null
+          user_id?: string
+          vin?: string | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
