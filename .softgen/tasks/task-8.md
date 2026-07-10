@@ -1,6 +1,6 @@
 ---
 title: User Settings - Business Profile & Branding
-status: in_progress
+status: done
 priority: medium
 type: feature
 tags: [settings, branding, storage, profile]
@@ -13,16 +13,19 @@ position: 8
 Allow authenticated users to update their business profile (name, contact, address) and branding (logo, primary/accent colors). Logo uploads go to a Supabase Storage bucket.
 
 ## Checklist
-- [ ] Create a storage bucket `logos` with public read policy
-- [ ] Create `src/pages/settings.tsx` protected with `withAuth`
-- [ ] Build form with business name, phone, email, address inputs
-- [ ] Add logo uploader with preview
-- [ ] Add color pickers for primary and accent colors
-- [ ] Save changes to `user_profiles`
-- [ ] Show toast feedback
-- [ ] Pass `check_for_errors`
+- [x] Create a storage bucket `logos` with public read policy
+- [x] Create `src/pages/settings.tsx` protected with `withAuth`
+- [x] Build form with business name, phone, email, address inputs
+- [x] Add logo uploader with preview
+- [x] Add color pickers for primary and accent colors
+- [x] Add password update section
+- [x] Add linked login providers management
+- [x] Save changes to `user_profiles`
+- [x] Show toast feedback
+- [x] Pass `check_for_errors`
 
 ## Acceptance
 - Authenticated users can update their business details
 - Logo uploads persist and display in preview
 - Brand colors update in real-time preview
+- Users can change their password and manage linked providers
