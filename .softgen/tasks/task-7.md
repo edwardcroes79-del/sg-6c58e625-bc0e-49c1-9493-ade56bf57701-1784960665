@@ -1,6 +1,6 @@
 ---
 title: Auth Middleware & Route Protection
-status: in_progress
+status: done
 priority: high
 type: feature
 tags: [auth, middleware, routing, supabase]
@@ -13,11 +13,11 @@ position: 7
 Protect dashboard and admin routes by checking Supabase session. Use Edge middleware for fast cookie-based redirects plus a `withAuth` HOC for client-side session validation and loading states.
 
 ## Checklist
-- [ ] Create `src/middleware.ts` to redirect unauthenticated users from `/dashboard` and `/admin`
-- [ ] Create `src/lib/withAuth.tsx` HOC for client-side session validation
-- [ ] Create basic `src/pages/dashboard.tsx` protected with `withAuth`
-- [ ] Add logout capability and user role display
-- [ ] Run `check_for_errors` and validate redirects
+- [x] Create `src/middleware.ts` to redirect unauthenticated users from `/dashboard` and `/onboarding`
+- [x] Create `src/lib/withAuth.tsx` HOC for client-side session validation
+- [x] Create basic `src/pages/dashboard.tsx` protected with `withAuth`
+- [x] Add logout capability and user role display
+- [x] Run `check_for_errors` and validate redirects
 
 ## Acceptance
 - Unauthenticated users hitting `/dashboard` are redirected to `/login`

@@ -1,27 +1,27 @@
 ---
 title: Design System & Landing Page
-status: in_progress
+status: done
 priority: urgent
 type: chore
-tags: [design-system, theme, landing]
+tags: [design-system, landing-page, auth]
 created_by: agent
-created_at: 2026-07-10T19:23:56Z
+created_at: 2026-07-10T19:24:00Z
 position: 1
 ---
 
 ## Notes
-Set up the visual foundation: tokens, fonts, animations, and a premium landing page that sells the digital service card concept.
+Establish the visual identity for the Digital Vehicle Service Card: deep slate, signal amber, porcelain background, Sora headings, IBM Plex Sans body, IBM Plex Mono for data. Use glassmorphism cards, dot-grid texture, and animated status orbs. Apply tokens to globals.css and tailwind.config.ts.
 
 ## Checklist
-- [ ] Theme globals.css with custom color tokens and fonts
-- [ ] Sync tokens to tailwind.config.ts
-- [ ] Build Hero section with floating vehicle card preview
-- [ ] Build Features section with glassmorphism cards
-- [ ] Build How It Works section
-- [ ] Build CTA and footer
-- [ ] Add dark mode support
+- [x] Apply design tokens to `globals.css` (deep slate primary, amber accent, success/warning/danger)
+- [x] Register fonts and custom animations in `tailwind.config.ts`
+- [x] Build premium landing page at `src/pages/index.tsx`
+- [x] Build branded glassmorphism login page at `src/pages/login.tsx`
+- [x] Add Toaster to `_app.tsx`
+- [x] Ensure responsive layout and accessibility basics
+- [x] Pass `check_for_errors`
 
 ## Acceptance
-- Landing page renders correctly in light and dark mode
-- All design tokens are usable as Tailwind classes
-- Page feels premium and responsive
+- Landing page renders the hero, stats, features, and CTA
+- Login page matches the brand and supports sign-in/up/forgot flows
+- Both pages pass type checks

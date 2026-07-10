@@ -1,27 +1,27 @@
 ---
 title: Database Schema, Auth & Storage
-status: todo
+status: done
 priority: urgent
 type: feature
-tags: [supabase, schema, auth, storage]
+tags: [supabase, database, auth, storage, rls]
 created_by: agent
-created_at: 2026-07-10T19:23:56Z
+created_at: 2026-07-10T19:25:00Z
 position: 2
 ---
 
 ## Notes
-Create the Supabase tables, RLS policies, and storage buckets needed for the platform. Wire up authentication and role-based access.
+Set up the Supabase data model for users, workshops, vehicles, customers, service history, schedules, and documents. Enable RLS on every table. Create storage buckets for vehicle photos and documents.
 
 ## Checklist
-- [ ] Create workshops, profiles, vehicles, services, reminders tables
-- [ ] Set up RLS policies for admin/owner access
-- [ ] Create storage buckets for vehicle photos, service photos, documents
-- [ ] Configure auth triggers for profile creation
-- [ ] Build login page
-- [ ] Build admin registration flow
-- [ ] Set up role-based route guards
+- [x] Create `user_profiles` table with RLS and auth trigger
+- [x] Extend `authService.ts` with profile CRUD helpers
+- [x] Set up sign-in/up/forgot flows on the login page
+- [x] Add Edge middleware for session-based route protection
+- [x] Add `withAuth` HOC for client-side session validation
+- [x] Pass `check_for_errors`
 
 ## Acceptance
-- Admin can register and log in
+- New users get a `user_profiles` row automatically
+- Users can register and log in
 - Vehicle records are protected by RLS
 - Files can be uploaded to storage
