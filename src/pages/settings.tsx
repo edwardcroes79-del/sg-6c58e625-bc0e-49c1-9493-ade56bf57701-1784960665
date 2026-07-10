@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { withAuth } from "@/lib/withAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { getUserProfile, upsertUserProfile, UserProfile, updateUserMetadata } from "@/services/authService";
+import { getUserProfile, upsertUserProfile, UserProfile, updateUserMetadata, listMfaFactors, enrollMfaFactor, verifyMfaFactor, unenrollMfaFactor } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
 import { User, Building2, Lock, ShieldCheck, Upload, Loader2, KeyRound, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
