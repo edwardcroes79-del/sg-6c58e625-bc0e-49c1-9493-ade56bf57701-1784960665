@@ -21,6 +21,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  Settings,
 } from "lucide-react";
 
 function DashboardPage({ user }: { user: User }) {
