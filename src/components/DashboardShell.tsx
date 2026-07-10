@@ -154,5 +154,3 @@ export function DashboardShell({
     </>
   );
 }
-
-export const DashboardPage = withAuth(DashboardShell);
