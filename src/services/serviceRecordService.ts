@@ -6,14 +6,14 @@ export type ServiceRow = Database["public"]["Tables"]["services"]["Row"];
 export type ServiceItemInsert = Database["public"]["Tables"]["service_items"]["Insert"];
 export type ReminderInsert = Database["public"]["Tables"]["reminders"]["Insert"];
 
-export interface ServiceWithItems extends ServiceRow {
+export type ServiceWithItems = ServiceRow & {
   service_items: ServiceItemInsert[];
   vehicles: { id: string; make: string | null; model: string | null; license_plate: string | null } | null;
-}
+};
 
-export interface ReminderWithVehicle extends Database["public"]["Tables"]["reminders"]["Row"] {
+export type ReminderWithVehicle = Database["public"]["Tables"]["reminders"]["Row"] & {
   vehicles: { make: string | null; model: string | null; license_plate: string | null } | null;
-}
+};
 
 export interface ServiceFormData {
   vehicle_id: string;
