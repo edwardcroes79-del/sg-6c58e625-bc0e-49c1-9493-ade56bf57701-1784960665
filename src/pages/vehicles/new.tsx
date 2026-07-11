@@ -9,9 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createVehicle } from "@/services/vehicleService";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, Car, Upload, Loader2 } from "lucide-react";
+import { Plus, ChevronLeft, Car, Upload, Loader2 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
-import { getCustomers } from "@/services/customerService";
+import { createCustomer, getCustomers } from "@/services/customerService";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const fuelTypes = ["Petrol", "Diesel", "Hybrid", "Electric", "LPG"];
 const transmissions = ["Manual", "Automatic", "CVT", "DCT"];
@@ -47,9 +48,16 @@ function NewVehiclePage({ user }: { user: User }) {
     next_service_km: "",
     customer_id: "",
   });
+  const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({ full_name: "", email: "", phone: "", address: "", emergency_contact: "" });
+  const [creatingCustomer, setCreatingCustomer] = useState(false);
+
+  const loadCustomers = () => {
+    getCustomers(user.id).then(setCustomers).catch(console.error);
+  };
 
   useEffect(() => {
-    getCustomers(user.id).then(setCustomers).catch(console.error);
+    loadCustomers();
   }, [user.id]);
 
   const update = (key: string, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
@@ -230,7 +238,44 @@ function NewVehiclePage({ user }: { user: User }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="customer">Owner (customer)</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="customer">Owner (customer)</Label>
+                    <Dialog open={customerDialogOpen} onOpenChange={setCustomerDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button type="button" variant="ghost" size="sm" className="h-auto gap-1 p-0 text-xs text-accent"><Plus className="h-3 w-3" /> New customer</Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader><DialogTitle>Add new customer</DialogTitle></DialogHeader>
+                        <div className="space-y-3 py-2">
+                          <Input placeholder="Full name" value={newCustomer.full_name} onChange={(e) => setNewCustomer({ ...newCustomer, full_name: e.target.value })} />
+                          <Input placeholder="Email" value={newCustomer.email} onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })} />
+                          <Input placeholder="Phone" value={newCustomer.phone} onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })} />
+                          <Input placeholder="Address" value={newCustomer.address} onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })} />
+                          <Input placeholder="Emergency contact" value={newCustomer.emergency_contact} onChange={(e) => setNewCustomer({ ...newCustomer, emergency_contact: e.target.value })} />
+                          <Button
+                            className="w-full bg-accent text-accent-foreground"
+                            disabled={creatingCustomer || !newCustomer.full_name}
+                            onClick={async () => {
+                              setCreatingCustomer(true);
+                              try {
+                                const created = await createCustomer({ ...newCustomer, user_id: user.id });
+                                setForm((prev) => ({ ...prev, customer_id: created.id }));
+                                toast({ title: "Customer created" });
+                                setCustomerDialogOpen(false);
+                                loadCustomers();
+                              } catch (err: any) {
+                                toast({ variant: "destructive", title: "Failed to create customer", description: err.message });
+                              } finally {
+                                setCreatingCustomer(false);
+                              }
+                            }}
+                          >
+                            {creatingCustomer ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create customer"}
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                   <Select value={form.customer_id} onValueChange={(v) => update("customer_id", v)}>
                     <SelectTrigger id="customer">
                       <SelectValue placeholder="Select a customer" />

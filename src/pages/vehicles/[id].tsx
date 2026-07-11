@@ -8,13 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getVehicle, updateVehicle, deleteVehicle, computeVehicleStatus, statusLabel, statusBadgeVariant } from "@/services/vehicleService";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Calendar, Gauge, FileText, QrCode, Share2, Trash2, Loader2, Wrench, Pencil, Save, X } from "lucide-react";
+import { ArrowLeft, Calendar, Gauge, FileText, QrCode, Share2, Trash2, Loader2, Wrench, Pencil, Save, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDateInput } from "@/lib/utils";
 import type { User } from "@supabase/supabase-js";
-import { getCustomers } from "@/services/customerService";
+import { createCustomer, getCustomers } from "@/services/customerService";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 function VehicleDetailPage({ user }: { user: User }) {
   const router = useRouter();
@@ -26,14 +27,21 @@ function VehicleDetailPage({ user }: { user: User }) {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<any>({});
   const [customers, setCustomers] = useState<Array<any>>([]);
+  const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({ full_name: "", email: "", phone: "", address: "", emergency_contact: "" });
+  const [creatingCustomer, setCreatingCustomer] = useState(false);
 
   useEffect(() => {
     if (!id || typeof id !== "string") return;
     loadVehicle();
   }, [id]);
 
-  useEffect(() => {
+  const loadCustomers = () => {
     getCustomers(user.id).then(setCustomers).catch(console.error);
+  };
+
+  useEffect(() => {
+    loadCustomers();
   }, [user.id]);
 
   const loadVehicle = async () => {
@@ -181,7 +189,44 @@ function VehicleDetailPage({ user }: { user: User }) {
                   <Field label="Service interval (months)" value={form.service_interval_months} onChange={(v) => setForm({ ...form, service_interval_months: v })} type="number" />
                   <Field label="Service interval (km)" value={form.service_interval_km} onChange={(v) => setForm({ ...form, service_interval_km: v })} type="number" />
                   <div className="sm:col-span-2 space-y-1">
-                    <Label className="text-xs text-muted-foreground">Owner (customer)</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs text-muted-foreground">Owner (customer)</Label>
+                      <Dialog open={customerDialogOpen} onOpenChange={setCustomerDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button type="button" variant="ghost" size="sm" className="h-auto gap-1 p-0 text-xs text-accent"><Plus className="h-3 w-3" /> New customer</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader><DialogTitle>Add new customer</DialogTitle></DialogHeader>
+                          <div className="space-y-3 py-2">
+                            <Input placeholder="Full name" value={newCustomer.full_name} onChange={(e) => setNewCustomer({ ...newCustomer, full_name: e.target.value })} />
+                            <Input placeholder="Email" value={newCustomer.email} onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })} />
+                            <Input placeholder="Phone" value={newCustomer.phone} onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })} />
+                            <Input placeholder="Address" value={newCustomer.address} onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })} />
+                            <Input placeholder="Emergency contact" value={newCustomer.emergency_contact} onChange={(e) => setNewCustomer({ ...newCustomer, emergency_contact: e.target.value })} />
+                            <Button
+                              className="w-full bg-accent text-accent-foreground"
+                              disabled={creatingCustomer || !newCustomer.full_name}
+                              onClick={async () => {
+                                setCreatingCustomer(true);
+                                try {
+                                  const created = await createCustomer({ ...newCustomer, user_id: user.id });
+                                  setForm({ ...form, customer_id: created.id });
+                                  toast({ title: "Customer created" });
+                                  setCustomerDialogOpen(false);
+                                  loadCustomers();
+                                } catch (err: any) {
+                                  toast({ variant: "destructive", title: "Failed to create customer", description: err.message });
+                                } finally {
+                                  setCreatingCustomer(false);
+                                }
+                              }}
+                            >
+                              {creatingCustomer ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create customer"}
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                     <Select value={form.customer_id || ""} onValueChange={(v) => setForm({ ...form, customer_id: v })}>
                       <SelectTrigger><SelectValue placeholder="Select a customer" /></SelectTrigger>
                       <SelectContent>
