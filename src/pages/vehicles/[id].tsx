@@ -8,7 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getVehicle, updateVehicle, deleteVehicle, computeVehicleStatus, statusLabel, statusBadgeVariant } from "@/services/vehicleService";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Calendar, Gauge, FileText, QrCode, Share2, Trash2, Loader2, Wrench } from "lucide-react";
+import { ArrowLeft, Calendar, Gauge, FileText, QrCode, Share2, Trash2, Loader2, Wrench, Pencil, Save, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatDateInput } from "@/lib/utils";
 import type { User } from "@supabase/supabase-js";
 
 function VehicleDetailPage({ user }: { user: User }) {
@@ -17,6 +21,9 @@ function VehicleDetailPage({ user }: { user: User }) {
   const { toast } = useToast();
   const [vehicle, setVehicle] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<any>({});
 
   useEffect(() => {
     if (!id || typeof id !== "string") return;
@@ -28,10 +35,44 @@ function VehicleDetailPage({ user }: { user: User }) {
     try {
       const data = await getVehicle(id as string);
       setVehicle(data);
+      setForm(data);
     } catch (err: any) {
       toast({ variant: "destructive", title: "Error loading vehicle", description: err.message });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!vehicle) return;
+    setSaving(true);
+    try {
+      const updates = {
+        make: form.make,
+        model: form.model,
+        year: Number(form.year) || null,
+        vin: form.vin,
+        license_plate: form.license_plate,
+        engine_type: form.engine_type,
+        transmission: form.transmission,
+        fuel_type: form.fuel_type,
+        color: form.color,
+        current_mileage: Number(form.current_mileage) || 0,
+        registration_expiry: form.registration_expiry || null,
+        insurance_expiry: form.insurance_expiry || null,
+        next_service_date: form.next_service_date || null,
+        next_service_km: form.next_service_km ? Number(form.next_service_km) : null,
+        service_interval_months: form.service_interval_months ? Number(form.service_interval_months) : null,
+        service_interval_km: form.service_interval_km ? Number(form.service_interval_km) : null,
+      };
+      await updateVehicle(vehicle.id, updates, user.id);
+      toast({ title: "Vehicle updated" });
+      setEditing(false);
+      loadVehicle();
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Update failed", description: err.message });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -64,15 +105,25 @@ function VehicleDetailPage({ user }: { user: User }) {
       user={user}
       actions={
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => router.push(`/vehicles/${id}/service`)} className="gap-2">
-            <Wrench className="h-4 w-4" /> Log service
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => router.push(`/service-card/${vehicle.id}`)} className="gap-2">
-            <QrCode className="h-4 w-4" /> Service card
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleDelete} className="gap-2 text-destructive">
-            <Trash2 className="h-4 w-4" /> Delete
-          </Button>
+          {editing ? (
+            <>
+              <Button variant="outline" size="sm" onClick={() => { setEditing(false); setForm(vehicle); }} className="gap-2"><X className="h-4 w-4" /> Cancel</Button>
+              <Button size="sm" onClick={handleUpdate} disabled={saving} className="gap-2 bg-accent text-accent-foreground"><Save className="h-4 w-4" /> {saving ? "Saving..." : "Save"}</Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="gap-2"><Pencil className="h-4 w-4" /> Edit</Button>
+              <Button variant="outline" size="sm" onClick={() => router.push(`/vehicles/${id}/service`)} className="gap-2">
+                <Wrench className="h-4 w-4" /> Log service
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => router.push(`/service-card/${vehicle.id}`)} className="gap-2">
+                <QrCode className="h-4 w-4" /> Service card
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleDelete} className="gap-2 text-destructive">
+                <Trash2 className="h-4 w-4" /> Delete
+              </Button>
+            </>
+          )}
         </div>
       }
     >
@@ -104,16 +155,37 @@ function VehicleDetailPage({ user }: { user: User }) {
               <h2 className="font-heading text-2xl font-bold">
                 {vehicle.year} {vehicle.make} {vehicle.model}
               </h2>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <DetailItem label="VIN" value={vehicle.vin} />
-                <DetailItem label="Engine" value={vehicle.engine_type} />
-                <DetailItem label="Transmission" value={vehicle.transmission} />
-                <DetailItem label="Fuel type" value={vehicle.fuel_type} />
-                <DetailItem label="Color" value={vehicle.color} />
-                <DetailItem label="Current mileage" value={`${vehicle.current_mileage.toLocaleString()} km`} />
-                <DetailItem label="Registration expires" value={vehicle.registration_expiry} />
-                <DetailItem label="Insurance expires" value={vehicle.insurance_expiry} />
-              </div>
+              {editing ? (
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <Field label="Make" value={form.make} onChange={(v) => setForm({ ...form, make: v })} />
+                  <Field label="Model" value={form.model} onChange={(v) => setForm({ ...form, model: v })} />
+                  <Field label="Year" value={form.year} onChange={(v) => setForm({ ...form, year: v })} type="number" />
+                  <Field label="License plate" value={form.license_plate} onChange={(v) => setForm({ ...form, license_plate: v })} />
+                  <Field label="VIN" value={form.vin} onChange={(v) => setForm({ ...form, vin: v })} />
+                  <Field label="Engine" value={form.engine_type} onChange={(v) => setForm({ ...form, engine_type: v })} />
+                  <SelectField label="Transmission" value={form.transmission} options={["Manual", "Automatic", "CVT", "Other"]} onChange={(v) => setForm({ ...form, transmission: v })} />
+                  <SelectField label="Fuel type" value={form.fuel_type} options={["Petrol", "Diesel", "Electric", "Hybrid", "Other"]} onChange={(v) => setForm({ ...form, fuel_type: v })} />
+                  <Field label="Color" value={form.color} onChange={(v) => setForm({ ...form, color: v })} />
+                  <Field label="Current mileage (km)" value={form.current_mileage} onChange={(v) => setForm({ ...form, current_mileage: v })} type="number" />
+                  <Field label="Registration expiry" value={formatDateInput(form.registration_expiry)} onChange={(v) => setForm({ ...form, registration_expiry: v })} type="date" />
+                  <Field label="Insurance expiry" value={formatDateInput(form.insurance_expiry)} onChange={(v) => setForm({ ...form, insurance_expiry: v })} type="date" />
+                  <Field label="Next service date" value={formatDateInput(form.next_service_date)} onChange={(v) => setForm({ ...form, next_service_date: v })} type="date" />
+                  <Field label="Next service km" value={form.next_service_km} onChange={(v) => setForm({ ...form, next_service_km: v })} type="number" />
+                  <Field label="Service interval (months)" value={form.service_interval_months} onChange={(v) => setForm({ ...form, service_interval_months: v })} type="number" />
+                  <Field label="Service interval (km)" value={form.service_interval_km} onChange={(v) => setForm({ ...form, service_interval_km: v })} type="number" />
+                </div>
+              ) : (
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <DetailItem label="VIN" value={vehicle.vin} />
+                  <DetailItem label="Engine" value={vehicle.engine_type} />
+                  <DetailItem label="Transmission" value={vehicle.transmission} />
+                  <DetailItem label="Fuel type" value={vehicle.fuel_type} />
+                  <DetailItem label="Color" value={vehicle.color} />
+                  <DetailItem label="Current mileage" value={`${vehicle.current_mileage.toLocaleString()} km`} />
+                  <DetailItem label="Registration expires" value={vehicle.registration_expiry} />
+                  <DetailItem label="Insurance expires" value={vehicle.insurance_expiry} />
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -230,6 +302,31 @@ function VehicleDetailPage({ user }: { user: User }) {
         </div>
       </div>
     </DashboardShell>
+  );
+}
+
+function Field({ label, value, onChange, type = "text" }: { label: string; value: any; onChange: (val: string) => void; type?: string }) {
+  return (
+    <div className="space-y-1">
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Input type={type} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  );
+}
+
+function SelectField({ label, value, options, onChange }: { label: string; value: any; options: string[]; onChange: (val: string) => void }) {
+  return (
+    <div className="space-y-1">
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Select value={value || ""} onValueChange={onChange}>
+        <SelectTrigger><SelectValue placeholder={`Select ${label.toLowerCase()}`} /></SelectTrigger>
+        <SelectContent>
+          {options.map((opt) => (
+            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
 
