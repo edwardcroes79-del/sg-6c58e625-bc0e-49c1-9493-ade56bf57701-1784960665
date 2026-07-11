@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDateInput } from "@/lib/utils";
 import type { User } from "@supabase/supabase-js";
-import { listCustomers } from "@/services/customerService";
+import { getCustomers } from "@/services/customerService";
 
 function VehicleDetailPage({ user }: { user: User }) {
   const router = useRouter();
@@ -33,7 +33,7 @@ function VehicleDetailPage({ user }: { user: User }) {
   }, [id]);
 
   useEffect(() => {
-    listCustomers(user.id).then(setCustomers).catch(console.error);
+    getCustomers(user.id).then(setCustomers).catch(console.error);
   }, [user.id]);
 
   const loadVehicle = async () => {

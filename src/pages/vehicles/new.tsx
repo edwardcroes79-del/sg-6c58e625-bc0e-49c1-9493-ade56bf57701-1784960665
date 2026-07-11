@@ -11,7 +11,7 @@ import { createVehicle } from "@/services/vehicleService";
 import { useToast } from "@/hooks/use-toast";
 import { ChevronLeft, Car, Upload, Loader2 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
-import { listCustomers } from "@/services/customerService";
+import { getCustomers } from "@/services/customerService";
 
 const fuelTypes = ["Petrol", "Diesel", "Hybrid", "Electric", "LPG"];
 const transmissions = ["Manual", "Automatic", "CVT", "DCT"];
@@ -49,7 +49,7 @@ function NewVehiclePage({ user }: { user: User }) {
   });
 
   useEffect(() => {
-    listCustomers(user.id).then(setCustomers).catch(console.error);
+    getCustomers(user.id).then(setCustomers).catch(console.error);
   }, [user.id]);
 
   const update = (key: string, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
