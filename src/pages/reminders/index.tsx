@@ -15,6 +15,12 @@ const statusMap: Record<string, { label: string; variant: "default" | "secondary
   dismissed: { label: "Dismissed", variant: "outline" },
 };
 
+const reminderLabel: Record<string, string> = {
+  scheduled_service: "Scheduled service",
+  mileage_based: "Mileage-based service",
+  time_based: "Time-based service",
+};
+
 function RemindersPage({ user }: { user: User }) {
   const router = useRouter();
   const [reminders, setReminders] = useState<ReminderRow[]>([]);
@@ -96,7 +102,9 @@ function RemindersPage({ user }: { user: User }) {
                         {reminder.vehicles?.make} {reminder.vehicles?.model}{" "}
                         <span className="text-muted-foreground">({reminder.vehicles?.license_plate})</span>
                       </p>
-                      <p className="text-sm text-muted-foreground">{reminder.message}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {reminderLabel[reminder.reminder_type] || reminder.reminder_type}
+                      </p>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         <Badge variant={statusMap[reminder.status]?.variant || "outline"}>
                           {statusMap[reminder.status]?.label || reminder.status}

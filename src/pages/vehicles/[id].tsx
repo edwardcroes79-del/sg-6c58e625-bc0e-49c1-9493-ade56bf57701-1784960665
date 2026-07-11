@@ -64,10 +64,13 @@ function VehicleDetailPage({ user }: { user: User }) {
       user={user}
       actions={
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => router.push(`/vehicles/${id}/service`)} className="gap-2">
+            <Wrench className="h-4 w-4" /> Log service
+          </Button>
           <Button variant="outline" size="sm" onClick={() => router.push(`/service-card/${vehicle.id}`)} className="gap-2">
             <QrCode className="h-4 w-4" /> Service card
           </Button>
-          <Button variant="outline" size="sm" onClick={handleDelete} className="gap-2 text-danger">
+          <Button variant="outline" size="sm" onClick={handleDelete} className="gap-2 text-destructive">
             <Trash2 className="h-4 w-4" /> Delete
           </Button>
         </div>

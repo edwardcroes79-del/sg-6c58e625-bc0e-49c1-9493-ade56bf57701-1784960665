@@ -44,7 +44,6 @@ function ServicesPage({ user }: { user: User }) {
     const term = search.toLowerCase();
     return (
       r.service_type.toLowerCase().includes(term) ||
-      r.technician?.toLowerCase().includes(term) ||
       r.vehicles?.license_plate?.toLowerCase().includes(term) ||
       r.vehicles?.make?.toLowerCase().includes(term) ||
       r.vehicles?.model?.toLowerCase().includes(term)
@@ -83,7 +82,7 @@ function ServicesPage({ user }: { user: User }) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search by vehicle, service type, technician..."
+              placeholder="Search by vehicle or service type..."
               className="pl-9"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -120,7 +119,7 @@ function ServicesPage({ user }: { user: User }) {
                         <span className="text-muted-foreground">({record.vehicles?.license_plate})</span>
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {record.service_type} • {record.mileage?.toLocaleString()} km • {record.technician || "No technician"}
+                        {record.service_type} • {record.mileage?.toLocaleString()} km
                       </p>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         <Badge variant={statusMap[record.status]?.variant || "outline"}>

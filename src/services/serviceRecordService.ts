@@ -10,7 +10,6 @@ export type ReminderRow = Database["public"]["Tables"]["reminders"]["Row"];
 export interface ServiceWithItems extends ServiceRow {
   service_items: ServiceItemInsert[];
   vehicles: { id: string; make: string | null; model: string | null; license_plate: string | null } | null;
-  customers: { id: string; full_name: string | null } | null;
 }
 
 export interface ServiceFormData {
@@ -18,8 +17,6 @@ export interface ServiceFormData {
   service_date: string;
   mileage: number;
   service_type: string;
-  description: string;
-  technician: string;
   cost: number;
   next_service_date?: string | null;
   next_service_mileage?: number | null;
@@ -27,7 +24,6 @@ export interface ServiceFormData {
     name: string;
     quantity: number;
     unit_price: number;
-    item_type: "part" | "labor" | "other";
   }>;
   status: "scheduled" | "in_progress" | "completed" | "cancelled";
 }
@@ -41,8 +37,6 @@ export async function createServiceRecord(userId: string, data: ServiceFormData)
       service_date: data.service_date,
       mileage: data.mileage,
       service_type: data.service_type,
-      description: data.description,
-      technician: data.technician,
       cost: data.cost,
       next_service_date: data.next_service_date,
       next_service_mileage: data.next_service_mileage,
@@ -59,8 +53,6 @@ export async function createServiceRecord(userId: string, data: ServiceFormData)
       name: item.name,
       quantity: item.quantity,
       unit_price: item.unit_price,
-      item_type: item.item_type,
-      total_price: item.quantity * item.unit_price,
     }));
     const { error: itemsError } = await supabase.from("service_items").insert(items);
     if (itemsError) throw itemsError;
@@ -70,11 +62,10 @@ export async function createServiceRecord(userId: string, data: ServiceFormData)
     const reminder: ReminderInsert = {
       user_id: userId,
       vehicle_id: data.vehicle_id,
-      type: "time",
+      reminder_type: "scheduled_service",
       due_date: data.next_service_date,
       due_mileage: data.next_service_mileage,
       status: "pending",
-      message: `Scheduled ${data.service_type} service due`,
     };
     const { error: reminderError } = await supabase.from("reminders").insert(reminder);
     if (reminderError) throw reminderError;
@@ -89,8 +80,7 @@ export async function listServiceRecords(userId: string): Promise<ServiceWithIte
     .select(`
       *,
       service_items (*),
-      vehicles (id, make, model, license_plate),
-      customers (id, full_name)
+      vehicles (id, make, model, license_plate)
     `)
     .eq("user_id", userId)
     .order("service_date", { ascending: false });
@@ -105,8 +95,7 @@ export async function getServiceRecordById(userId: string, id: string): Promise<
     .select(`
       *,
       service_items (*),
-      vehicles (id, make, model, license_plate),
-      customers (id, full_name)
+      vehicles (id, make, model, license_plate)
     `)
     .eq("id", id)
     .eq("user_id", userId)
