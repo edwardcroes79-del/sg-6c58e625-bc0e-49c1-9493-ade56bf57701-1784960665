@@ -104,6 +104,10 @@ export async function createVehicle(vehicle: VehicleInsert, images: File[] = [])
     if (imgError) throw imgError;
   }
 
+  if (data.next_service_date) {
+    await upsertReminderFromVehicle(vehicle.user_id, data.id, data as Vehicle);
+  }
+
   return data as Vehicle;
 }
 
@@ -153,6 +157,11 @@ export async function updateVehicle(id: string, updates: VehicleUpdate, userId: 
     .select()
     .single();
   if (error) throw error;
+
+  if (data.next_service_date) {
+    await upsertReminderFromVehicle(userId, data.id, data as Vehicle);
+  }
+
   return data as Vehicle;
 }
 
@@ -185,5 +194,21 @@ export async function addVehicleDocuments(
     })
   );
   const { error } = await supabase.from("vehicle_documents").insert(records);
+  if (error) throw error;
+}
+
+export async function upsertReminderFromVehicle(userId: string, vehicleId: string, vehicle: Partial<Vehicle>) {
+  if (!vehicle.next_service_date) return;
+  const { error } = await supabase.from("reminders").upsert(
+    {
+      user_id: userId,
+      vehicle_id: vehicleId,
+      reminder_type: "scheduled_service",
+      due_date: vehicle.next_service_date,
+      due_mileage: vehicle.next_service_km ?? null,
+      status: "pending",
+    },
+    { onConflict: "vehicle_id,reminder_type" }
+  );
   if (error) throw error;
 }
