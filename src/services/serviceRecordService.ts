@@ -5,11 +5,14 @@ export type ServiceInsert = Database["public"]["Tables"]["services"]["Insert"];
 export type ServiceRow = Database["public"]["Tables"]["services"]["Row"];
 export type ServiceItemInsert = Database["public"]["Tables"]["service_items"]["Insert"];
 export type ReminderInsert = Database["public"]["Tables"]["reminders"]["Insert"];
-export type ReminderRow = Database["public"]["Tables"]["reminders"]["Row"];
 
 export interface ServiceWithItems extends ServiceRow {
   service_items: ServiceItemInsert[];
   vehicles: { id: string; make: string | null; model: string | null; license_plate: string | null } | null;
+}
+
+export interface ReminderWithVehicle extends Database["public"]["Tables"]["reminders"]["Row"] {
+  vehicles: { make: string | null; model: string | null; license_plate: string | null } | null;
 }
 
 export interface ServiceFormData {
@@ -38,8 +41,6 @@ export async function createServiceRecord(userId: string, data: ServiceFormData)
       mileage: data.mileage,
       service_type: data.service_type,
       cost: data.cost,
-      next_service_date: data.next_service_date,
-      next_service_mileage: data.next_service_mileage,
       status: data.status,
     })
     .select("id")
@@ -64,11 +65,21 @@ export async function createServiceRecord(userId: string, data: ServiceFormData)
       vehicle_id: data.vehicle_id,
       reminder_type: "scheduled_service",
       due_date: data.next_service_date,
-      due_mileage: data.next_service_mileage,
+      due_mileage: data.next_service_mileage ?? null,
       status: "pending",
     };
     const { error: reminderError } = await supabase.from("reminders").insert(reminder);
     if (reminderError) throw reminderError;
+
+    const { error: vehicleError } = await supabase
+      .from("vehicles")
+      .update({
+        next_service_date: data.next_service_date,
+        next_service_km: data.next_service_mileage ?? null,
+      })
+      .eq("id", data.vehicle_id)
+      .eq("user_id", userId);
+    if (vehicleError) throw vehicleError;
   }
 
   return service.id;
@@ -115,7 +126,7 @@ export async function deleteServiceRecord(id: string, userId: string): Promise<v
   if (error) throw error;
 }
 
-export async function listReminders(userId: string): Promise<ReminderRow[]> {
+export async function listReminders(userId: string): Promise<ReminderWithVehicle[]> {
   const { data, error } = await supabase
     .from("reminders")
     .select("*, vehicles(make, model, license_plate)")
@@ -123,7 +134,7 @@ export async function listReminders(userId: string): Promise<ReminderRow[]> {
     .order("due_date", { ascending: true });
 
   if (error) throw error;
-  return (data as unknown as ReminderRow[]) ?? [];
+  return (data as unknown as ReminderWithVehicle[]) ?? [];
 }
 
 export async function markReminderDone(id: string, userId: string): Promise<void> {

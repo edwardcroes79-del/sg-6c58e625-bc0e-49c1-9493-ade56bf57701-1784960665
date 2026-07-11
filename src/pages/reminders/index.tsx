@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { withAuth } from "@/lib/withAuth";
-import { listReminders, markReminderDone, dismissReminder, ReminderRow } from "@/services/serviceRecordService";
+import { listReminders, markReminderDone, dismissReminder, ReminderWithVehicle } from "@/services/serviceRecordService";
 import { Bell, Calendar, Car, CheckCircle2, Loader2, XCircle } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
@@ -23,7 +23,7 @@ const reminderLabel: Record<string, string> = {
 
 function RemindersPage({ user }: { user: User }) {
   const router = useRouter();
-  const [reminders, setReminders] = useState<ReminderRow[]>([]);
+  const [reminders, setReminders] = useState<ReminderWithVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
 
