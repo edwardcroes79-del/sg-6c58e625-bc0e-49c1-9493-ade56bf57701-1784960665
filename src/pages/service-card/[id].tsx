@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { getVehicle, computeVehicleStatus, statusLabel, statusBadgeVariant } from "@/services/vehicleService";
 import { getServicesForVehicle } from "@/services/serviceRecordService";
-import { Loader2, Car, Calendar, Gauge, Wrench, Phone, Mail, MapPin, Share2, Printer, ArrowLeft } from "lucide-react";
+import { Loader2, Car, Calendar, Gauge, Wrench, Phone, Mail, MapPin, Share2, Printer, ArrowLeft, QrCode } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import Head from "next/head";
 
@@ -14,11 +14,25 @@ export default function ServiceCardPage() {
   const { id } = router.query;
   const [vehicle, setVehicle] = useState<any>(null);
   const [services, setServices] = useState<any[]>([]);
+  const [qrUrl, setQrUrl] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id || typeof id !== "string") return;
     loadData();
+  }, [id]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !id) return;
+    let cancelled = false;
+    import("qrcode").then((QRCode) => {
+      if (cancelled) return;
+      const url = `${window.location.origin}/service-card/${id}`;
+      QRCode.toDataURL(url, { width: 256, margin: 2 }, (err, dataUrl) => {
+        if (!err) setQrUrl(dataUrl);
+      });
+    });
+    return () => { cancelled = true; };
   }, [id]);
 
   const loadData = async () => {
@@ -134,7 +148,23 @@ export default function ServiceCardPage() {
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-6 md:grid-cols-2">
+              <div className="mt-6 grid gap-6 md:grid-cols-3">
+                <Card className="md:col-span-1">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold"><QrCode className="h-4 w-4 text-accent" /> Scan to view live card</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-col items-center">
+                    {qrUrl ? (
+                      <img src={qrUrl} alt="Service card QR code" className="h-48 w-48 rounded-xl border" />
+                    ) : (
+                      <div className="flex h-48 w-48 items-center justify-center rounded-xl border bg-muted">
+                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                    <p className="mt-3 text-center text-xs text-muted-foreground">Point your camera here to open the latest service card.</p>
+                  </CardContent>
+                </Card>
+
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base font-semibold"><Calendar className="h-4 w-4 text-accent" /> Next service due</CardTitle>
