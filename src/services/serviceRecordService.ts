@@ -146,3 +146,13 @@ export async function dismissReminder(id: string, userId: string): Promise<void>
   const { error } = await supabase.from("reminders").update({ status: "dismissed" }).eq("id", id).eq("user_id", userId);
   if (error) throw error;
 }
+
+export async function getServicesForVehicle(vehicleId: string) {
+  const { data, error } = await supabase
+    .from("services")
+    .select("*, service_items(*)")
+    .eq("vehicle_id", vehicleId)
+    .order("service_date", { ascending: false });
+  if (error) throw error;
+  return (data || []) as ServiceWithItems[];
+}
