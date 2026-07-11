@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { withAuth } from "@/lib/withAuth";
 import { listReminders, markReminderDone, dismissReminder, ReminderWithVehicle } from "@/services/serviceRecordService";
-import { Bell, Calendar, Car, CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { Bell, Calendar, Car, CheckCircle2, Loader2, XCircle, Mail } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
@@ -26,6 +26,7 @@ function RemindersPage({ user }: { user: User }) {
   const [reminders, setReminders] = useState<ReminderWithVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
+  const [sendingTest, setSendingTest] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -65,6 +66,24 @@ function RemindersPage({ user }: { user: User }) {
     }
   };
 
+  const sendTest = async () => {
+    setSendingTest(true);
+    try {
+      const res = await fetch("/api/send-reminder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ test_email: user.email }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to send");
+      alert("Test reminder sent. Check your inbox (and spam).");
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setSendingTest(false);
+    }
+  };
+
   return (
     <DashboardShell title="Reminders" user={user}>
       <Card className="glass-card mb-6">
@@ -73,6 +92,12 @@ function RemindersPage({ user }: { user: User }) {
           <CardDescription>Upcoming and overdue service work.</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Automatic reminders are sent 7 days before the due date.</p>
+            <Button size="sm" variant="outline" className="gap-2" onClick={sendTest} disabled={sendingTest}>
+              {sendingTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />} Send test to me
+            </Button>
+          </div>
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-accent" />
