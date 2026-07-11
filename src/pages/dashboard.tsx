@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Settings,
 } from "lucide-react";
+import Link from "next/link";
 
 function DashboardPage({ user }: { user: User }) {
   const router = useRouter();
@@ -78,14 +79,15 @@ function DashboardPage({ user }: { user: User }) {
 
             <nav className="flex-1 space-y-1">
               {[
-                { label: "Dashboard", icon: Car, active: true },
-                { label: "Vehicles", icon: Car },
-                { label: "Customers", icon: Users },
-                { label: "Service history", icon: Wrench },
-                { label: "Reminders", icon: Bell },
+                { label: "Dashboard", href: "/dashboard", icon: Car, active: true },
+                { label: "Vehicles", href: "/vehicles", icon: Car },
+                { label: "Customers", href: "/customers", icon: Users },
+                { label: "Service history", href: "/services", icon: Wrench },
+                { label: "Reminders", href: "/reminders", icon: Bell },
               ].map((item) => (
-                <button
+                <Link
                   key={item.label}
+                  href={item.href}
                   className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                     item.active
                       ? "bg-primary text-primary-foreground"
@@ -94,15 +96,15 @@ function DashboardPage({ user }: { user: User }) {
                 >
                   <item.icon className="h-4 w-4" />
                   {item.label}
-                </button>
+                </Link>
               ))}
-              <button
-                onClick={() => router.push("/settings")}
+              <Link
+                href="/settings"
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 <Settings className="h-4 w-4" />
                 Settings
-              </button>
+              </Link>
             </nav>
 
             <div className="mt-auto border-t border-border pt-4">
@@ -152,7 +154,7 @@ function DashboardPage({ user }: { user: User }) {
               <Button variant="outline" size="sm" className="hidden gap-2 sm:flex">
                 <Search className="h-4 w-4" /> Search
               </Button>
-              <Button size="sm" className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90">
+              <Button size="sm" className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => router.push("/vehicles/new")}>
                 <Car className="h-4 w-4" /> Add vehicle
               </Button>
             </div>
@@ -197,7 +199,7 @@ function DashboardPage({ user }: { user: User }) {
                     <p className="text-sm text-muted-foreground">
                       Add a vehicle and schedule its first service.
                     </p>
-                    <Button variant="outline" size="sm" className="mt-4 gap-2">
+                    <Button variant="outline" size="sm" className="mt-4 gap-2" onClick={() => router.push("/vehicles/new")}>
                       Add vehicle <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
