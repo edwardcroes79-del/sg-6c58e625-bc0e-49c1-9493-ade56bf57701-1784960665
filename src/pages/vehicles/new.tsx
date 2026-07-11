@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { DashboardShell } from "@/components/DashboardShell";
 import { withAuth } from "@/lib/withAuth";
@@ -11,6 +11,7 @@ import { createVehicle } from "@/services/vehicleService";
 import { useToast } from "@/hooks/use-toast";
 import { ChevronLeft, Car, Upload, Loader2 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import { listCustomers } from "@/services/customerService";
 
 const fuelTypes = ["Petrol", "Diesel", "Hybrid", "Electric", "LPG"];
 const transmissions = ["Manual", "Automatic", "CVT", "DCT"];
@@ -26,6 +27,7 @@ function NewVehiclePage({ user }: { user: User }) {
   const [submitting, setSubmitting] = useState(false);
   const [step, setStep] = useState(1);
   const [photos, setPhotos] = useState<File[]>([]);
+  const [customers, setCustomers] = useState<Array<any>>([]);
   const [form, setForm] = useState({
     license_plate: "",
     make: "",
@@ -43,7 +45,12 @@ function NewVehiclePage({ user }: { user: User }) {
     service_interval_km: "15000",
     next_service_date: "",
     next_service_km: "",
+    customer_id: "",
   });
+
+  useEffect(() => {
+    listCustomers(user.id).then(setCustomers).catch(console.error);
+  }, [user.id]);
 
   const update = (key: string, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
 
@@ -84,6 +91,7 @@ function NewVehiclePage({ user }: { user: User }) {
           service_interval_km: parseInt(form.service_interval_km, 10),
           next_service_date: form.next_service_date || null,
           next_service_km: form.next_service_km ? parseInt(form.next_service_km, 10) : null,
+          customer_id: form.customer_id || null,
         },
         photos
       );
@@ -219,6 +227,20 @@ function NewVehiclePage({ user }: { user: User }) {
                     <Label htmlFor="insurance_expiry">Insurance expiry</Label>
                     <Input id="insurance_expiry" type="date" value={form.insurance_expiry} onChange={(e) => update("insurance_expiry", e.target.value)} />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="customer">Owner (customer)</Label>
+                  <Select value={form.customer_id} onValueChange={(v) => update("customer_id", v)}>
+                    <SelectTrigger id="customer">
+                      <SelectValue placeholder="Select a customer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {customers.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.full_name} {c.email ? `(${c.email})` : ""}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="flex justify-end">

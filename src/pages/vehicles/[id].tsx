@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatDateInput } from "@/lib/utils";
 import type { User } from "@supabase/supabase-js";
+import { listCustomers } from "@/services/customerService";
 
 function VehicleDetailPage({ user }: { user: User }) {
   const router = useRouter();
@@ -24,11 +25,16 @@ function VehicleDetailPage({ user }: { user: User }) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<any>({});
+  const [customers, setCustomers] = useState<Array<any>>([]);
 
   useEffect(() => {
     if (!id || typeof id !== "string") return;
     loadVehicle();
   }, [id]);
+
+  useEffect(() => {
+    listCustomers(user.id).then(setCustomers).catch(console.error);
+  }, [user.id]);
 
   const loadVehicle = async () => {
     setLoading(true);
@@ -64,6 +70,7 @@ function VehicleDetailPage({ user }: { user: User }) {
         next_service_km: form.next_service_km ? Number(form.next_service_km) : null,
         service_interval_months: form.service_interval_months ? Number(form.service_interval_months) : null,
         service_interval_km: form.service_interval_km ? Number(form.service_interval_km) : null,
+        customer_id: form.customer_id || null,
       };
       await updateVehicle(vehicle.id, updates, user.id);
       toast({ title: "Vehicle updated" });
@@ -173,6 +180,17 @@ function VehicleDetailPage({ user }: { user: User }) {
                   <Field label="Next service km" value={form.next_service_km} onChange={(v) => setForm({ ...form, next_service_km: v })} type="number" />
                   <Field label="Service interval (months)" value={form.service_interval_months} onChange={(v) => setForm({ ...form, service_interval_months: v })} type="number" />
                   <Field label="Service interval (km)" value={form.service_interval_km} onChange={(v) => setForm({ ...form, service_interval_km: v })} type="number" />
+                  <div className="sm:col-span-2 space-y-1">
+                    <Label className="text-xs text-muted-foreground">Owner (customer)</Label>
+                    <Select value={form.customer_id || ""} onValueChange={(v) => setForm({ ...form, customer_id: v })}>
+                      <SelectTrigger><SelectValue placeholder="Select a customer" /></SelectTrigger>
+                      <SelectContent>
+                        {customers.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.full_name} {c.email ? `(${c.email})` : ""}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               ) : (
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
