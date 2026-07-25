@@ -15,48 +15,48 @@ import {
   ArrowRight,
   CheckCircle2,
   Users,
-  Settings,
-} from "lucide-react";
+  Settings } from
+"lucide-react";
 
 const features = [
-  {
-    icon: QrCode,
-    title: "Digital Service Card",
-    description: "Every vehicle gets a beautiful, shareable digital card with a unique QR code.",
-  },
-  {
-    icon: CalendarClock,
-    title: "Smart Maintenance Schedule",
-    description: "Track service intervals by time and mileage so nothing falls through the cracks.",
-  },
-  {
-    icon: Bell,
-    title: "Automatic Reminders",
-    description: "Branded email reminders fire 14 days, 7 days, on the due date, and weekly after.",
-  },
-  {
-    icon: Wrench,
-    title: "Complete Service History",
-    description: "Log work, parts, oil, costs, invoices, and photos in one chronological timeline.",
-  },
-  {
-    icon: FileText,
-    title: "Branded PDF Reports",
-    description: "Generate workshop-branded service reports and export them in seconds.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Secure & White-Label",
-    description: "Role-based access, encrypted data, and fully customizable workshop branding.",
-  },
-];
+{
+  icon: QrCode,
+  title: "Digital Service Card",
+  description: "Every vehicle gets a beautiful, shareable digital card with a unique QR code."
+},
+{
+  icon: CalendarClock,
+  title: "Smart Maintenance Schedule",
+  description: "Track service intervals by time and mileage so nothing falls through the cracks."
+},
+{
+  icon: Bell,
+  title: "Automatic Reminders",
+  description: "Branded email reminders fire 14 days, 7 days, on the due date, and weekly after."
+},
+{
+  icon: Wrench,
+  title: "Complete Service History",
+  description: "Log work, parts, oil, costs, invoices, and photos in one chronological timeline."
+},
+{
+  icon: FileText,
+  title: "Branded PDF Reports",
+  description: "Generate workshop-branded service reports and export them in seconds."
+},
+{
+  icon: ShieldCheck,
+  title: "Secure & White-Label",
+  description: "Role-based access, encrypted data, and fully customizable workshop branding."
+}];
+
 
 const stats = [
-  { label: "Workshops", value: "120+" },
-  { label: "Vehicles Tracked", value: "45k+" },
-  { label: "Service Records", value: "1.2M+" },
-  { label: "Countries", value: "18" },
-];
+{ label: "Workshops", value: "120+" },
+{ label: "Vehicles Tracked", value: "45k+" },
+{ label: "Service Records", value: "1.2M+" },
+{ label: "Countries", value: "18" }];
+
 
 export default function Home() {
   return (
@@ -64,8 +64,8 @@ export default function Home() {
       <SEO
         title="Digital Vehicle Service Card | White-Label Maintenance Platform"
         description="Replace paper service books with a secure, shareable digital service card for workshops, dealerships, and fleet operators."
-        url="https://servicecard.app"
-      />
+        url="https://servicecard.app" />
+      
       <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
         {/* Background effects */}
         <div className="pointer-events-none absolute inset-0 dot-grid opacity-60" />
@@ -79,15 +79,15 @@ export default function Home() {
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
                 <Car className="h-5 w-5" />
               </div>
-              <span className="font-heading text-lg font-semibold tracking-tight">
-                ServiceCard
+              <span className="font-heading text-lg font-semibold tracking-tight">ServiceCard.
+
               </span>
             </Link>
             <div className="flex items-center gap-4">
               <Link
                 href="/login"
-                className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-block"
-              >
+                className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-block">
+                
                 Sign in
               </Link>
               <Button asChild size="sm" className="rounded-full px-5">
@@ -103,8 +103,8 @@ export default function Home() {
             <div className="max-w-2xl space-y-8">
               <Badge
                 variant="secondary"
-                className="h-8 rounded-full bg-accent/10 px-4 text-accent-foreground hover:bg-accent/10"
-              >
+                className="h-8 rounded-full bg-accent/10 px-4 text-accent-foreground hover:bg-accent/10">
+                
                 White-label vehicle maintenance platform
               </Badge>
               <h1 className="font-heading text-4xl font-bold leading-[1.1] tracking-tight md:text-6xl">
@@ -120,8 +120,8 @@ export default function Home() {
                 <Button
                   asChild
                   size="lg"
-                  className="h-12 rounded-full px-8 text-base shadow-lg shadow-accent/20"
-                >
+                  className="h-12 rounded-full px-8 text-base shadow-lg shadow-accent/20">
+                  
                   <Link href="/login">
                     Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
@@ -130,8 +130,8 @@ export default function Home() {
                   asChild
                   variant="outline"
                   size="lg"
-                  className="h-12 rounded-full px-8 text-base"
-                >
+                  className="h-12 rounded-full px-8 text-base">
+                  
                   <Link href="#features">See Features</Link>
                 </Button>
               </div>
@@ -223,8 +223,8 @@ export default function Home() {
         <section className="relative z-10 border-y border-border/50 bg-muted/30">
           <div className="container py-12">
             <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-              {stats.map((stat) => (
-                <div key={stat.label} className="text-center">
+              {stats.map((stat) =>
+              <div key={stat.label} className="text-center">
                   <p className="font-heading text-3xl font-bold text-foreground md:text-4xl">
                     {stat.value}
                   </p>
@@ -232,7 +232,7 @@ export default function Home() {
                     {stat.label}
                   </p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </section>
@@ -250,11 +250,11 @@ export default function Home() {
               </p>
             </div>
             <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => (
-                <Card
-                  key={feature.title}
-                  className="group glass-card transition-all hover:-translate-y-1 hover:shadow-2xl"
-                >
+              {features.map((feature) =>
+              <Card
+                key={feature.title}
+                className="group glass-card transition-all hover:-translate-y-1 hover:shadow-2xl">
+                
                   <CardContent className="p-6">
                     <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-accent transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
                       <feature.icon className="h-6 w-6" />
@@ -267,7 +267,7 @@ export default function Home() {
                     </p>
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </div>
           </div>
         </section>
@@ -289,8 +289,8 @@ export default function Home() {
                   <Button
                     asChild
                     size="lg"
-                    className="h-12 rounded-full bg-accent px-8 text-base font-semibold text-accent-foreground hover:bg-accent/90"
-                  >
+                    className="h-12 rounded-full bg-accent px-8 text-base font-semibold text-accent-foreground hover:bg-accent/90">
+                    
                     <Link href="/login">
                       Create Account <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
@@ -299,8 +299,8 @@ export default function Home() {
                     asChild
                     size="lg"
                     variant="outline"
-                    className="h-12 rounded-full border-primary-foreground/30 px-8 text-base text-primary-foreground hover:bg-primary-foreground/10"
-                  >
+                    className="h-12 rounded-full border-primary-foreground/30 px-8 text-base text-primary-foreground hover:bg-primary-foreground/10">
+                    
                     <Link href="/login">Workshop Sign In</Link>
                   </Button>
                 </div>
@@ -336,6 +336,6 @@ export default function Home() {
           </div>
         </footer>
       </main>
-    </>
-  );
+    </>);
+
 }
