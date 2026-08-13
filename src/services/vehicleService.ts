@@ -228,7 +228,6 @@ export async function upsertReminderFromVehicle(userId: string, vehicleId: strin
       due_date: payload.due_date ?? null,
       due_mileage: payload.due_mileage,
       status: existing.status === "completed" ? "completed" : "pending",
-      updated_at: new Date().toISOString(),
     };
     if (existing.status !== "completed") {
       reminderUpdates.sent_at = null;
