@@ -70,9 +70,17 @@ export function DashboardShell({
         >
           <div className="flex h-full flex-col p-5">
             <Link href="/dashboard" className="mb-8 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <Car className="h-5 w-5" />
-              </div>
+              {profile?.logo_url ? (
+                <img
+                  src={profile.logo_url}
+                  alt={profile.business_name || "Logo"}
+                  className="h-10 w-10 rounded-xl object-contain"
+                />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                  <Car className="h-5 w-5" />
+                </div>
+              )}
               <span className="font-heading text-lg font-semibold line-clamp-1">
                 {profile?.business_name || "ServiceCard"}
               </span>
