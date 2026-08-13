@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { withAuth, WithAuthProps } from "@/lib/withAuth";
 import { signOut, getUserProfile, UserProfile } from "@/services/authService";
+import { applyBrandingColors } from "@/lib/branding";
 import {
   Car,
   Users,
@@ -44,6 +45,9 @@ export function DashboardShell({
     let mounted = true;
     getUserProfile(user.id).then((p) => {
       if (mounted) setProfile(p);
+      if (p?.primary_color || p?.accent_color) {
+        applyBrandingColors(p.primary_color, p.accent_color);
+      }
     });
     return () => {
       mounted = false;
