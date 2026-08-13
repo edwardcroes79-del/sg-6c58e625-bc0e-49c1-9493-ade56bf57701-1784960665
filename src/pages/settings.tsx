@@ -17,6 +17,33 @@ import { cn } from "@/lib/utils";
 import { logSecurityEvent, getSecurityEvents, getNotificationPreferences, upsertNotificationPreferences, sendSecurityEmail, SecurityEventType } from "@/services/notificationService";
 import { Badge } from "@/components/ui/badge";
 
+const applyBranding = (primary: string, accent: string) => {
+    const toHslTriplets = (hex: string) => {
+      const cleaned = hex.replace("#", "");
+      const r = parseInt(cleaned.substring(0, 2), 16) / 255;
+      const g = parseInt(cleaned.substring(2, 4), 16) / 255;
+      const b = parseInt(cleaned.substring(4, 6), 16) / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h = 0, s = 0, l = (max + min) / 2;
+      const d = max - min;
+      if (d !== 0) {
+        s = d / (1 - Math.abs(2 * l - 1));
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h *= 60;
+      }
+      return `${Math.round(h)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+    };
+    document.documentElement.style.setProperty("--primary", toHslTriplets(primary));
+    document.documentElement.style.setProperty("--accent", toHslTriplets(accent));
+    document.documentElement.style.setProperty("--ring", toHslTriplets(accent));
+    document.documentElement.style.setProperty("--sidebar-primary", toHslTriplets(primary));
+    document.documentElement.style.setProperty("--sidebar-accent", toHslTriplets(accent));
+  };
+
 function SettingsPage({ user }: { user: { id: string; email?: string } }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -107,6 +134,12 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
     load();
   }, [user.id, user.email]);
 
+  useEffect(() => {
+    if (profile) {
+      applyBranding(profile.primary_color || "#0F172A", profile.accent_color || "#F59E0B");
+    }
+  }, [profile]);
+
   const handleChange = (key: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
@@ -129,6 +162,7 @@ function SettingsPage({ user }: { user: { id: string; email?: string } }) {
         }),
         updateUserMetadata(form.full_name),
       ]);
+      applyBranding(form.primary_color, form.accent_color);
       toast({ title: "Profile saved", description: "Your business details have been updated." });
     } catch (err: any) {
       toast({ variant: "destructive", title: "Failed to save", description: err.message });
