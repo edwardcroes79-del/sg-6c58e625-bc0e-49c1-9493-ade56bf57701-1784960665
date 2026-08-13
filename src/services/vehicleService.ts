@@ -199,16 +199,43 @@ export async function addVehicleDocuments(
 
 export async function upsertReminderFromVehicle(userId: string, vehicleId: string, vehicle: Partial<Vehicle>) {
   if (!vehicle.next_service_date) return;
-  const { error } = await supabase.from("reminders").upsert(
-    {
-      user_id: userId,
-      vehicle_id: vehicleId,
-      reminder_type: "scheduled_service",
-      due_date: vehicle.next_service_date,
-      due_mileage: vehicle.next_service_km ?? null,
-      status: "pending",
-    },
-    { onConflict: "vehicle_id,reminder_type" }
-  );
+
+  const payload = {
+    user_id: userId,
+    vehicle_id: vehicleId,
+    reminder_type: "scheduled_service",
+    due_date: vehicle.next_service_date,
+    due_mileage: vehicle.next_service_km ?? null,
+    status: "pending",
+    sent_at: null,
+  };
+
+  const { data: existing, error: lookupError } = await supabase
+    .from("reminders")
+    .select("id, status")
+    .eq("vehicle_id", vehicleId)
+    .eq("reminder_type", "scheduled_service")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (lookupError) throw lookupError;
+
+  if (existing) {
+    const { error } = await supabase
+      .from("reminders")
+      .update({
+        due_date: payload.due_date,
+        due_mileage: payload.due_mileage,
+        status: existing.status === "completed" ? "completed" : "pending",
+        sent_at: existing.status === "completed" ? undefined : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existing.id);
+    if (error) throw error;
+    return;
+  }
+
+  const { error } = await supabase.from("reminders").insert(payload);
   if (error) throw error;
 }
