@@ -12,6 +12,8 @@ export type VehicleStatus = "up_to_date" | "due_soon" | "overdue";
 
 const STATUS_THRESHOLD_DAYS = 14;
 
+export type ReminderUpdate = Database["public"]["Tables"]["reminders"]["Update"];
+
 export function computeVehicleStatus(
   vehicle: Pick<Vehicle, "next_service_date" | "next_service_km" | "current_mileage">,
   now = new Date()
@@ -222,15 +224,18 @@ export async function upsertReminderFromVehicle(userId: string, vehicleId: strin
   if (lookupError) throw lookupError;
 
   if (existing) {
+    const reminderUpdates: ReminderUpdate = {
+      due_date: payload.due_date ?? null,
+      due_mileage: payload.due_mileage,
+      status: existing.status === "completed" ? "completed" : "pending",
+      updated_at: new Date().toISOString(),
+    };
+    if (existing.status !== "completed") {
+      reminderUpdates.sent_at = null;
+    }
     const { error } = await supabase
       .from("reminders")
-      .update({
-        due_date: payload.due_date,
-        due_mileage: payload.due_mileage,
-        status: existing.status === "completed" ? "completed" : "pending",
-        sent_at: existing.status === "completed" ? undefined : null,
-        updated_at: new Date().toISOString(),
-      })
+      .update(reminderUpdates)
       .eq("id", existing.id);
     if (error) throw error;
     return;

@@ -24,7 +24,8 @@ const applyBranding = (primary: string, accent: string) => {
       const g = parseInt(cleaned.substring(2, 4), 16) / 255;
       const b = parseInt(cleaned.substring(4, 6), 16) / 255;
       const max = Math.max(r, g, b), min = Math.min(r, g, b);
-      let h = 0, s = 0, l = (max + min) / 2;
+      let h = 0, s = 0;
+      const l = (max + min) / 2;
       const d = max - min;
       if (d !== 0) {
         s = d / (1 - Math.abs(2 * l - 1));
