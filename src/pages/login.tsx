@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { SEO } from "@/components/SEO";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { applyBrandingColors } from "@/lib/branding";
 import {
   Car,
   Eye,
@@ -21,6 +22,13 @@ import {
 
 type Mode = "sign_in" | "sign_up" | "forgot";
 
+type Branding = {
+  business_name: string | null;
+  logo_url: string | null;
+  primary_color: string | null;
+  accent_color: string | null;
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -30,6 +38,20 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [branding, setBranding] = useState<Branding | null>(null);
+
+  useEffect(() => {
+    supabase
+      .rpc("get_public_branding")
+      .then(({ data }) => {
+        const row = Array.isArray(data) ? data[0] : data;
+        if (row) {
+          setBranding(row as Branding);
+          applyBrandingColors(row.primary_color, row.accent_color);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,11 +139,19 @@ export default function LoginPage() {
               href="/"
               className="inline-flex items-center justify-center gap-2"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
-                <Car className="h-5 w-5" />
-              </div>
+              {branding?.logo_url ? (
+                <img
+                  src={branding.logo_url}
+                  alt={branding.business_name || "Workshop logo"}
+                  className="h-10 w-10 rounded-xl object-contain shadow-lg"
+                />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
+                  <Car className="h-5 w-5" />
+                </div>
+              )}
               <span className="font-heading text-xl font-semibold">
-                ServiceCard
+                {branding?.business_name || "ServiceCard"}
               </span>
             </Link>
           </div>
