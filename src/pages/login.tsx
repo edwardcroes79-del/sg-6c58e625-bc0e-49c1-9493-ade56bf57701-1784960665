@@ -41,13 +41,13 @@ export default function LoginPage() {
   const [branding, setBranding] = useState<Branding | null>(null);
 
   useEffect(() => {
-    supabase
-      .rpc("get_public_branding")
+    (supabase.rpc as (fn: string) => Promise<{ data: unknown }>)("get_public_branding")
       .then(({ data }) => {
         const row = Array.isArray(data) ? data[0] : data;
-        if (row) {
-          setBranding(row as Branding);
-          applyBrandingColors(row.primary_color, row.accent_color);
+        if (row && typeof row === "object") {
+          const b = row as Branding;
+          setBranding(b);
+          applyBrandingColors(b.primary_color, b.accent_color);
         }
       })
       .catch(() => {});
