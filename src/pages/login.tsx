@@ -41,7 +41,8 @@ export default function LoginPage() {
   const [branding, setBranding] = useState<Branding | null>(null);
 
   useEffect(() => {
-    (supabase.rpc as (fn: string) => Promise<{ data: unknown }>)("get_public_branding")
+    (supabase as unknown as { rpc: (fn: string) => Promise<{ data: unknown }> })
+      .rpc("get_public_branding")
       .then(({ data }) => {
         const row = Array.isArray(data) ? data[0] : data;
         if (row && typeof row === "object") {
